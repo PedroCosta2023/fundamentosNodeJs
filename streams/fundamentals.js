@@ -1,13 +1,32 @@
-// Netflix & Spotify
 
-// Importanção de clientes via CSV
-// 1gb - 1.000.000
-// POST /upload import.csv
+// Streams -->
 
-// 10mb/s - 100s
+// process.stdin
+//  .pipe(process.stdout)
 
-// 100s -> Inserções no Banco de Dados
+import { on } from 'node:events'
+import { read } from 'node:fs'
+import { stdout } from 'node:process'
+import {Readable} from 'node:stream'
 
-// 10mb/s -> 10.000
+class oneToHundredStream extends Readable{
+    index = 1
 
-// Readble Streams / Whitable Streams
+    _read () {
+        const i = this.index++
+
+        setTimeout(() =>{
+            if(i > 100) {
+                this.push(null)
+            } else{
+                const buf = Buffer.from(String(i))
+    
+                this.push(buf)
+            }
+        },500)
+
+    }
+}
+
+    new oneToHundredStream()
+    .pipe(process.stdout)
