@@ -7,26 +7,40 @@
 import { on } from 'node:events'
 import { read } from 'node:fs'
 import { stdout } from 'node:process'
-import {Readable} from 'node:stream'
+import { Readable, Writable, Transform } from 'node:stream'
 
-class oneToHundredStream extends Readable{
+class oneToHundredStream extends Readable {
     index = 1
 
-    _read () {
+    _read() {
         const i = this.index++
 
-        setTimeout(() =>{
-            if(i > 100) {
+        setTimeout(() => {
+            if (i > 100) {
                 this.push(null)
-            } else{
+            } else {
                 const buf = Buffer.from(String(i))
-    
                 this.push(buf)
             }
-        },500)
+        }, 100)
 
     }
 }
 
-    new oneToHundredStream()
-    .pipe(process.stdout)
+class InverseNumberStream extends Transform {
+    _transform (chunk, encoding, callback){
+    const transformed = Number(chunk.toString()) * -1 
+    callback(null, Buffer.from(String(transformed)))
+    }
+}
+
+class MultiplyByTenStream extends Writable {
+    _write(chunk, encoding, callback) {
+        console.log(Number(chunk.toString()) * 10)
+        callback()
+    }
+}
+
+new oneToHundredStream()
+.pipe(new InverseNumberStream())
+.pipe(new MultiplyByTenStream())
