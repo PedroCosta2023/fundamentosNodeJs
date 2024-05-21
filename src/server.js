@@ -1,35 +1,33 @@
-import http, { METHODS } from 'node:http'
-import { url } from 'node:inspector'
+import http from 'node:http'
 import { json } from './middlewares/json.js'
+import { Database } from './database.js'
 
-// - criar usuarios
-// - listar usuarios
-// - editar usuarios
-// - remover usuarios
 
-// HTTP Status Code
-
-const users = []
+const database = new Database()
 
 
 const server = http.createServer( async (req,res) =>{
-
-    const {method, url} = req
+    const { method, url } = req
 
      await json(req, res)
 
     if(method === 'GET' && url === "/users"){
+        const users = database.select("users")
+
         return res
         .end(JSON.stringify(users))
     }
 
     if(method === 'POST' && url === "/users"){
         const { nome, email} = req.body
-        users.push({
+
+        const users = {
             id: 0,
             nome,
             email
-        })
+        }
+
+        database.insert("users",users)
 
         return res.writeHead(201).end()
     }
